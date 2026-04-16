@@ -1,0 +1,149 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  userId       String        @id @default(auto()) @map("_id") @db.ObjectId
+  username     String
+  email        String        @unique
+  password     String
+  role         Role          @default(user)
+  token        String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  testRequests TestRequest[] @relation("Created")
+  testStories  TestRequest[] @relation("Assigned")
+  payments     Payment[]
+
+  @@index([userId])
+}
+
+model WaterType {
+  waterTypeId  String        @id @default(auto()) @map("_id") @db.ObjectId
+  name         String        @unique
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  testRequests TestRequest[]
+}
+
+model TestRequest {
+  requestId         String            @id @default(auto()) @map("_id") @db.ObjectId
+  userId            String            @db.ObjectId
+  user              User              @relation("Created", fields: [userId], references: [userId])
+  testerId          String?           @db.ObjectId
+  tester            User?             @relation("Assigned", fields: [testerId], references: [userId])
+  location          String
+  sampleLocation    String
+  mobileNumber      String
+  waterTypeId       String            @db.ObjectId
+  waterType         WaterType         @relation(fields: [waterTypeId], references: [waterTypeId])
+  status            TestRequestStatus @default(Pending)
+  overallResult     ReportStatus?
+  reportGeneratedAt DateTime?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  sampleTests       SampleTest[]
+  payment           Payment[]
+
+  @@index([userId])
+  @@index([status])
+}
+
+model Test {
+  testId      String       @id @default(auto()) @map("_id") @db.ObjectId
+  name        String       @unique
+  description String
+  price       Float
+  minValue    Float
+  maxValue    Float
+  unit        String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  sampleTests SampleTest[]
+}
+
+model Payment {
+  paymentId String        @id @default(auto()) @map("_id") @db.ObjectId
+  requestId String        @db.ObjectId
+  request   TestRequest   @relation(fields: [requestId], references: [requestId])
+  userId    String        @db.ObjectId
+  user      User          @relation(fields: [userId], references: [userId])
+  amount    Float
+  status    PaymentStatus @default(Pending)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@index([userId])
+  @@index([status])
+}
+
+model SampleTest {
+  id           String           @id @default(auto()) @map("_id") @db.ObjectId
+  requestId    String           @db.ObjectId
+  request      TestRequest      @relation(fields: [requestId], references: [requestId])
+  testId       String           @db.ObjectId
+  test         Test             @relation(fields: [testId], references: [testId])
+  value        Float?
+  testName     String
+  minValueUsed Float
+  maxValueUsed Float
+  unitUsed     String
+  result       TestResultStatus?
+  status       SampleTestStatus @default(Pending)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+}
+
+enum PaymentStatus {
+  Pending
+  Success
+  Failed
+}
+
+enum SampleTestStatus {
+  Pending
+  Testing
+  Completed
+}
+
+enum TestRequestStatus {
+  Pending
+  Rejected
+  Accepted
+  PaymentPending
+  PaymentCollected
+  SampleCollected
+  Testing
+  Completed
+  Deleted
+}
+
+enum TestResultStatus {
+  SAFE
+  UNSAFE
+}
+
+enum ReportStatus {
+  EXCELLENT
+  GOOD
+  MODERATE
+  POOR
+  UNSAFE
+}
+
+enum Role {
+  admin
+  technician
+  user
+}
