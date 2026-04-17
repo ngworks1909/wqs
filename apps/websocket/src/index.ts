@@ -69,11 +69,11 @@ subscriber.on("connect", () => {
     console.log("Subscriber connected to Redis");
 })
 
-subscriber.on("error", (err: Error) => {
+subscriber.on("error", (err) => {
     console.error("Subscriber error:", err);
 })
 
-subscriber.subscribe(MessageType.socket_message, (err: Error | null, count: number) => {
+subscriber.subscribe(MessageType.socket_message, (err, count) => {
     if(err){
         console.error("Failed to subscribe to channel:", err);
     } else {
@@ -97,7 +97,7 @@ function broadcastSocketEvent(
 }
 
 
-subscriber.on("message", (channel: string, message: string) => {
+subscriber.on("message", (channel, message) => {
     if(channel === MessageType.socket_message){
         try {
             const socketEventValidationResponse = socketEventSchema.safeParse(JSON.parse(message));
