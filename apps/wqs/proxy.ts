@@ -27,7 +27,7 @@ const rolePaths: Record<Role, string[]> = {
   [Role.admin]: ["/", "/dashboard"],
 };
 
-export default withAuth(async (req: NextRequest) => {
+export default withAuth(async (req: any) => {
   const token = req.cookies.get("__Secure-next-auth.session-token")?.value
 
   // Redirect if no token
