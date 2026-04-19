@@ -1,7 +1,15 @@
+import { NEXT_AUTH_CONFIG } from "@/lib/auth"
 import { GalleryVerticalEnd } from "lucide-react"
+import { getServerSession } from "next-auth"
 import Link from "next/link"
+import { redirect } from "next/navigation";
 
-export default function AuthLayout({children}: {children: React.ReactNode}) {
+export default async function AuthLayout({children}: {children: React.ReactNode}) {
+  const session = await getServerSession(NEXT_AUTH_CONFIG);
+  if(session){
+    return redirect("/")
+  }
+
   return (
     <div className="bg-muted flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
       <div className="flex w-full max-w-sm flex-col gap-6">
