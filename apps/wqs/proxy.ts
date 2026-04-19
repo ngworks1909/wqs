@@ -1,13 +1,13 @@
-import { Role } from "@prisma/client";
-import { withAuth } from "next-auth/middleware";
-import { NextResponse } from "next/server";
+import { Role } from '@prisma/client';
+import { withAuth } from 'next-auth/middleware'
+import { NextResponse, NextRequest } from 'next/server';
 
 export const config = {
-  matcher: ["/", "/requests/:path*", "/dashboard/:path*", "/payments/:path*", "/pricing/:path*"],
-};
+  matcher: ["/", "/requests", "/dashboard", "/payments", "/requests/:path*", "/pricing/:path*"],
+}
 
 const rolePaths: Record<Role, string[]> = {
-  user: [
+  [Role.user]: [
     "/",
     "/requests",
     "/requests/pending",
@@ -17,44 +17,38 @@ const rolePaths: Record<Role, string[]> = {
     "/payments",
     "/pricing",
   ],
-  technician: [
+  [Role.technician]: [
     "/",
     "/requests",
     "/requests/pending",
     "/requests/sample-collection",
     "/requests/testing",
   ],
-  admin: ["/", "/dashboard"],
+  [Role.admin]: ["/", "/dashboard"],
 };
 
-export default withAuth(
-  function middleware(req) {
-    const token = req.nextauth.token;
-    const pathname = req.nextUrl.pathname;
+export default withAuth(async (req: any) => {
+  const token = req.nextauth.token;
 
-    const role = token?.role as Role;
-
-    if (!role) {
-      return NextResponse.redirect(new URL("/login", req.url));
-    }
-
-    if (!rolePaths[role]?.includes(pathname)) {
-      return NextResponse.redirect(new URL("/404", req.url));
-    }
-
-    if (pathname === "/" && role === "admin") {
-      return NextResponse.redirect(new URL("/dashboard", req.url));
-    }
-
-    if ((pathname === "/" || pathname === "/requests") && role !== "admin") {
-      return NextResponse.redirect(new URL("/requests/pending", req.url));
-    }
-
-    return NextResponse.next();
-  },
-  {
-    pages: {
-      signIn: "/login",
-    },
+  // Redirect if no token
+  if (!token) {
+    // Typecast req to NextRequest to access nextUrl
+    return NextResponse.redirect(new URL('/login', (req as NextRequest).url));
   }
-);
+  const userRole: Role = token.role;
+
+  const pathname = (req as NextRequest).nextUrl.pathname;
+  if (!rolePaths[userRole].includes(pathname)) {
+    return NextResponse.redirect(new URL("/404", (req as NextRequest).url));
+  }
+  if(pathname === "/" && userRole === Role.admin) {
+    return NextResponse.redirect(new URL("/dashboard", (req as NextRequest).url));
+  }
+
+  if (pathname === "/" || pathname === "/requests") {
+    return NextResponse.redirect(new URL("/requests/pending", (req as NextRequest).url));
+  }
+
+  // Allow the request to continue
+  return NextResponse.next();
+});
