@@ -38,7 +38,6 @@ export default function AuthButton({ type }: { type: AuthType }) {
               router.replace("/login")
           }else{
               const response = await signIn('credentials', { email, password, redirect: false });
-              console.log("Login Response" + JSON.stringify(response));
               if(response?.ok){
                 toast.success("Login successful")
                 setState({email: "", password: "", username: ""})
@@ -91,7 +90,7 @@ export default function AuthButton({ type }: { type: AuthType }) {
     <Field>
       <Button
         type="submit"
-        // disabled={isDisabled}
+        disabled={isDisabled}
         onClick={async(e) => {
           e.preventDefault();
           await handleSubmit()
