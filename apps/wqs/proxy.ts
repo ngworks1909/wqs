@@ -28,7 +28,7 @@ const rolePaths: Record<Role, string[]> = {
 };
 
 export default withAuth(async (req: any) => {
-  const token = req.cookies.get("__Secure-next-auth.session-token")?.value
+  const token = req.nextauth.token;
 
   // Redirect if no token
   if (!token) {
