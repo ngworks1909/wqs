@@ -37,14 +37,14 @@ export default function AuthButton({ type }: { type: AuthType }) {
               setState({password: "", username: ""})
               router.replace("/login")
           }else{
-              const response = await signIn('credentials', { email, password, redirect: false });
+              const response = await signIn('credentials', { email, password, callbackUrl: "/", redirect: false });
               if(response?.ok){
-                toast.success("Login successful")
-                setState({email: "", password: "", username: ""})
-                router.replace(`/`);
+                toast.success("Logged in successfully");
+                setState({password: "", email: "", username: ""})
+                router.replace("/");
               }
               else{
-                toast("Login failed")
+                toast.error(response?.error ?? "Invalid credentials");
               }
           }
       } catch (error) {
