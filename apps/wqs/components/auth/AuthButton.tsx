@@ -37,7 +37,7 @@ export default function AuthButton({ type }: { type: AuthType }) {
               setState({password: "", username: ""})
               router.replace("/login")
           }else{
-              const response = await signIn('credentials', { email, password, callbackUrl: "/", redirect: false });
+              const response = await signIn('credentials', { email, password, redirect: false });
               if(response?.ok){
                 toast.success("Logged in successfully");
                 setState({password: "", email: "", username: ""})
