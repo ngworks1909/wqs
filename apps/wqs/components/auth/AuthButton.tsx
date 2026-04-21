@@ -15,6 +15,8 @@ import { signup } from "@/actions/signup";
 import { toast } from "sonner";
 import { signIn } from "next-auth/react";
 import { isAxiosError } from "axios";
+import { getServerSession } from "next-auth";
+import { NEXT_AUTH_CONFIG } from "@/lib/auth";
 
 export default function AuthButton({ type }: { type: AuthType }) {
   const { email, password, username, setState } = useUserState();
@@ -41,6 +43,7 @@ export default function AuthButton({ type }: { type: AuthType }) {
               if(response?.ok){
                 toast.success("Logged in successfully");
                 setState({password: "", email: "", username: ""})
+                await getServerSession(NEXT_AUTH_CONFIG);
                 router.replace("/");
               }
               else{
