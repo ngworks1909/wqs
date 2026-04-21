@@ -30,11 +30,6 @@ const rolePaths: Record<Role, string[]> = {
 export default withAuth(async (req: any) => {
   const token = req.nextauth.token;
 
-  // Redirect if no token
-  if (!token) {
-    // Typecast req to NextRequest to access nextUrl
-    return NextResponse.redirect(new URL('/login', (req as NextRequest).url));
-  }
   const userRole: Role = token.role;
 
   const pathname = (req as NextRequest).nextUrl.pathname;

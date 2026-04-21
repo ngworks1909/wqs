@@ -43,7 +43,6 @@ export default function AuthButton({ type }: { type: AuthType }) {
               if(response?.ok){
                 toast.success("Logged in successfully");
                 setState({password: "", email: "", username: ""})
-                await getServerSession(NEXT_AUTH_CONFIG);
                 router.replace("/");
               }
               else{
